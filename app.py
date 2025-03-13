@@ -3,11 +3,14 @@ import requests
 import os
 from flask_cors import CORS  # Import CORS
 
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)  # Enable CORS
+
+# Add a homepage route to prevent 404 errors
 @app.route('/')
 def home():
     return "Flask is running on Render!"
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all domains
 
 # Get API Key from Environment Variables
 API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
@@ -31,20 +34,21 @@ def chat():
     }
 
     payload = {
-        "contents": [{"parts": [{"text": user_message}]}],  
+        "contents": [{"parts": [{"text": user_message}]}],  # Gemini API expects a "contents" field
         "generationConfig": {"temperature": 0.7}
     }
 
+    # Make API request
     response = requests.post(f"{GEMINI_API_URL}?key={API_KEY}", json=payload, headers=headers)
 
     if response.status_code == 200:
         response_data = response.json()
-        return jsonify(response_data)  
+        return jsonify(response_data)  # Send back Gemini's response
     else:
         return jsonify({
             "error": "Failed to get response from Gemini API",
             "status_code": response.status_code,
-            "details": response.text  
+            "details": response.text  # Log error details
         }), response.status_code
 
 if __name__ == '__main__':
