@@ -3,6 +3,9 @@ import requests
 import os
 from flask_cors import CORS  # Import CORS
 
+@app.route('/')
+def home():
+    return "Flask is running on Render!"
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all domains
 
