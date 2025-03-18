@@ -55,23 +55,25 @@ def format_bot_response(response_text):
     - Adds proper line breaks between numbered lists.
     - Ensures bold headings have spacing before them.
     - Converts list markers (-) into bullet points (•).
-    - Forces new lines after punctuation to improve readability.
+    - Removes extra line breaks.
+    - Ensures better readability by structuring lists.
     """
     if not response_text:
         return "I'm not sure how to respond to that."
 
-    # ✅ Ensure line breaks for numbered lists (e.g., "**1. Some text" → "\n\n1. **Some text**")
-    formatted_text = re.sub(r"(?<!\n)\*\*(\d+)\. ", r"\n\n\1. **", response_text)
+    # Ensure numbered list formatting with line breaks
+    formatted_text = re.sub(r"\*\*(\d+)\.\s*", r"\n\n\1. **", response_text)
 
-    # ✅ Ensure line breaks before bold headings (without excessive spacing)
-    formatted_text = re.sub(r"(?<!\n)\*\*(.*?)\*\*", r"\n\n**\1**", formatted_text)
+    # Ensure line breaks before bold headings
+    formatted_text = re.sub(r"\*\*(.*?)\*\*", r"\n\n**\1**", formatted_text)
 
-    # ✅ Convert "- " list markers into bullet points (only at start of lines)
-    formatted_text = re.sub(r"(?m)^\- ", "• ", formatted_text)
+    # Convert list markers (- or *) into bullet points
+    formatted_text = re.sub(r"[\*\-]\s+", "• ", formatted_text)
 
-    # ✅ Add newlines after full stops, question marks, and exclamation points for readability
-    formatted_text = re.sub(r"([.!?])\s+", r"\1\n", formatted_text)
+    # Remove excessive line breaks
+    formatted_text = re.sub(r"\n{3,}", "\n\n", formatted_text)
 
+    # Trim leading/trailing spaces and return formatted response
     return formatted_text.strip()
 
 if __name__ == '__main__':
