@@ -28,25 +28,23 @@ def chat():
         "generationConfig": {"temperature": 0.7}
     }
 
+    # Make API request
     response = requests.post(f"{GEMINI_API_URL}?key={API_KEY}", json=payload, headers=headers)
 
     if response.status_code == 200:
         response_data = response.json()
 
-        # Extract response text
+        # FIX: Ensure we're calling the correct function
         bot_reply = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure how to respond to that.")
-        bot_reply = format_bot_response(bot_reply)  # Apply improved formatting
+        
+        formatted_reply = format_bot_response(bot_reply)  # ✅ CORRECT FUNCTION
 
-        # **Format Response for Better Readability**
-        formatted_reply = format_response(bot_reply)
-
-        return jsonify({"response": formatted_reply})
-
+        return jsonify({"response": formatted_reply})  # ✅ Returns JSON response
     else:
         return jsonify({
             "error": "Failed to get response from Gemini API",
             "status_code": response.status_code,
-            "details": response.text
+            "details": response.text  # Log error details
         }), response.status_code
 
 import re  # 🚨 Import Regular Expressions at the Top
