@@ -49,7 +49,7 @@ def chat():
             "details": response.text
         }), response.status_code
 
-import re
+import re  # 🚨 Import Regular Expressions at the Top
 
 def format_bot_response(response_text):
     """
@@ -62,17 +62,17 @@ def format_bot_response(response_text):
     if not response_text:
         return "I'm not sure how to respond to that."
 
-    # Ensure line breaks for numbered lists
-    formatted_text = re.sub(r"\*\*(\d+)\. ", r"\n\n\1. **", response_text)
+    # ✅ Ensure line breaks for numbered lists (e.g., "**1. Some text" → "\n\n1. **Some text**")
+    formatted_text = re.sub(r"(?<!\n)\*\*(\d+)\. ", r"\n\n\1. **", response_text)
 
-    # Ensure line breaks before bold headings
-    formatted_text = re.sub(r"\*\*(.*?)\*\*", r"\n\n**\1**", formatted_text)
+    # ✅ Ensure line breaks before bold headings (without excessive spacing)
+    formatted_text = re.sub(r"(?<!\n)\*\*(.*?)\*\*", r"\n\n**\1**", formatted_text)
 
-    # Convert "- " list markers into bullet points
-    formatted_text = formatted_text.replace("- ", "• ")
+    # ✅ Convert "- " list markers into bullet points (only at start of lines)
+    formatted_text = re.sub(r"(?m)^\- ", "• ", formatted_text)
 
-    # Add newlines after sentences for better readability
-    formatted_text = re.sub(r"(?<!\n)([.!?]) ", r"\1\n", formatted_text)
+    # ✅ Add newlines after full stops, question marks, and exclamation points for readability
+    formatted_text = re.sub(r"([.!?])\s+", r"\1\n", formatted_text)
 
     return formatted_text.strip()
 
