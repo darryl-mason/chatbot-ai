@@ -47,33 +47,27 @@ def chat():
             "details": response.text  # Log error details
         }), response.status_code
 
-import re  # 🚨 Import Regular Expressions at the Top
+import re
 
 def format_bot_response(response_text):
     """
     Formats the bot's response for better readability.
-    - Adds proper line breaks between numbered lists.
-    - Ensures bold headings have spacing before them.
+    - Ensures numbered lists have line breaks.
     - Converts list markers (-) into bullet points (•).
-    - Removes extra line breaks.
-    - Ensures better readability by structuring lists.
+    - Adds new lines after punctuation for better readability.
     """
     if not response_text:
         return "I'm not sure how to respond to that."
 
-    # Ensure numbered list formatting with line breaks
-    formatted_text = re.sub(r"\*\*(\d+)\.\s*", r"\n\n\1. **", response_text)
+    # Ensure line breaks for numbered lists (e.g., "1. " -> "\n1. ")
+    formatted_text = re.sub(r"(\d+)\.\s", r"\n\1. ", response_text)
 
-    # Ensure line breaks before bold headings
-    formatted_text = re.sub(r"\*\*(.*?)\*\*", r"\n\n**\1**", formatted_text)
+    # Convert "- " into bullet points "• "
+    formatted_text = formatted_text.replace("- ", "• ")
 
-    # Convert list markers (- or *) into bullet points
-    formatted_text = re.sub(r"[\*\-]\s+", "• ", formatted_text)
+    # Add newlines after sentences for better readability
+    formatted_text = re.sub(r"([.!?])\s", r"\1\n", formatted_text)
 
-    # Remove excessive line breaks
-    formatted_text = re.sub(r"\n{3,}", "\n\n", formatted_text)
-
-    # Trim leading/trailing spaces and return formatted response
     return formatted_text.strip()
 
 if __name__ == '__main__':
