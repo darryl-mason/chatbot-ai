@@ -12,6 +12,10 @@ API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 # Gemini API URL
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent"
 
+@app.route('/')
+def home():
+    return '✅ Chatbot backend is running! Use the /chat endpoint to POST messages.'
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
