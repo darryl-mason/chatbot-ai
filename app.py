@@ -16,12 +16,29 @@ GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5
 def home():
     return '✅ Chatbot backend is running! Use the /chat endpoint to POST messages.'
 
-@app.route('/chat', methods=['POST'])
+import markdown  # Make sure this is at the top of your file
+
+@app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    
-    if not data or "message" not in data:
-        return jsonify({"error": "Message is required"}), 400
+    user_message = request.json["message"]
+
+    # Markdown-formatted reply (with **bold**, *bullets*, etc.)
+    markdown_text = """
+**Paris:**
+* Eiffel Tower
+* Louvre Museum
+
+**Rome:**
+* Colosseum
+* Vatican City
+
+Visit [this link](https://example.com) for more info!
+"""
+
+    # Convert Markdown to safe HTML
+    html_response = markdown.markdown(markdown_text)
+
+    return jsonify({ "response": html_response })
     
     user_message = data["message"]
 
