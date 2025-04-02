@@ -39,7 +39,8 @@ def chat():
         response_data = response.json()
         bot_reply = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure how to respond to that.")
 
-        # ✅ Fix Markdown inconsistencies before converting
+        # ✅ Fix Markdown issues before converting
+        bot_reply = re.sub(r"^\s*[\*\-]\s*$", "", bot_reply, flags=re.MULTILINE)  # Remove bullets with no content
         bot_reply = re.sub(r"(\n\s*-|\n\s*\d+\.)", r"\n\n\1", bot_reply)  # Ensure proper list spacing
         bot_reply = re.sub(r"(\n\s*\*\s*\n)", r"\n", bot_reply)  # Remove empty bullet points
 
