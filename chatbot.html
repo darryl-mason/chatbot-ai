@@ -82,6 +82,32 @@
             outline: none;  /* Removes focus outline */
         }
 
+        .timestamp {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.8);  /* Lightened white for visibility */
+            display: block;
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .user .timestamp {
+            color: rgba(255, 255, 255, 0.9);  /* Brighter white for blue background */
+        }
+
+        .bot .timestamp {
+            text-align: left;
+        }
+
+        /* Light Mode (default) */
+        body:not(.dark-mode) .bot .timestamp {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        /* Dark Mode */
+        body.dark-mode .bot .timestamp {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
         .chat-box {
             flex-grow: 1;
             overflow-y: auto;
@@ -90,6 +116,19 @@
             flex-direction: column;
             background: var(--bg-color);
             color: var(--text-color);
+        }
+
+        /* ✅ Bullet List Fix */
+        .chat-box ul {
+            padding-left: 20px; /* Ensures proper bullet indentation */
+            margin: 5px 0; /* Reduces excessive spacing */
+            list-style-type: disc; /* Ensures normal bullet points */
+        }
+
+        .chat-box li {
+            margin-bottom: 5px; /* Proper spacing between bullets */
+            padding-left: 5px; /* Fine-tunes alignment */
+            list-style-position: outside; /* ✅ Fixes bullet alignment */
         }
     
         .message {
@@ -166,7 +205,7 @@
                 padding: 10px;
                 background: white;
             }
-    
+
             .chat-input input {
                 flex: 1;
                 padding: 12px;
@@ -192,6 +231,11 @@
         </div>
     </div>
 
+    <div style="text-align: center; padding: 10px;">
+        <button onclick="downloadChatHistory()">📥 Download Chat</button>
+        <button onclick="clearChatHistory()">🧹 Clear Chat</button>
+    </div>
+
     <script>
         function toggleDarkMode() {
             document.body.classList.toggle("dark-mode");
@@ -199,9 +243,36 @@
             button.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
         }
 
+        function getCurrentTimestamp() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function saveMessage(sender, text) {
+            const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+            history.push({ sender, text, timestamp: getCurrentTimestamp() });
+            localStorage.setItem("chatHistory", JSON.stringify(history));
+        }   
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+            let chatBox = document.getElementById("chatBox");
+
+            history.forEach((msg) => {
+                let message = document.createElement("div");
+                message.className = `message ${msg.sender}`;
+                message.innerHTML = `${msg.text.replace(/\n/g, "<br>")} <span class="timestamp">${msg.timestamp || getCurrentTimestamp()}</span>`;
+                chatBox.appendChild(message);
+            });
+
+            // Ensure the chatbox scrolls to the most recent message
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         window.onload = function () {
             document.getElementById("userInput").disabled = false;
             document.getElementById("sendBtn").disabled = false;
+            // loadHistory(); // 🧹 Disabled to prevent chat from reloading on refresh
         };
 
         async function sendMessage() {
@@ -215,14 +286,17 @@
             userInputElem.disabled = true;
             sendBtn.disabled = true;
 
+            // Display user's message
             let userMessage = document.createElement("div");
             userMessage.className = "message user";
-            userMessage.textContent = userInput;
+            userMessage.innerHTML = `${userInput} <span class="timestamp">${getCurrentTimestamp()}</span>`;
             chatBox.appendChild(userMessage);
+            saveMessage("user", userInput);
+            trackAnalytics("user"); // ✅ Add this line here
             userInputElem.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Remove any existing typing indicator before adding a new one
+            // Remove any existing typing indicator
             let existingTypingIndicator = document.getElementById("loading");
             if (existingTypingIndicator) {
                 existingTypingIndicator.remove();
@@ -246,39 +320,126 @@
                 let result = await response.json();
                 console.log("✅ Response received!", result);
 
-                // Ensure typing indicator is removed
-                if (typingIndicator.parentNode === chatBox) {
-                    chatBox.removeChild(typingIndicator);
-                }
-
                 let botReply = result.response || "I didn't understand that.";
 
-                let botMessage = document.createElement("div");
-                botMessage.className = "message bot";
-                botMessage.innerHTML = botReply.replace(/\n/g, "<br>");  // Preserve line breaks
-                chatBox.appendChild(botMessage);
-                chatBox.scrollTop = chatBox.scrollHeight;
-    
+            // Remove typing indicator
+            if (typingIndicator.parentNode === chatBox) {
+                chatBox.removeChild(typingIndicator);
+            }
+
+            // Create bot message container
+            let botMessage = document.createElement("div");
+            botMessage.className = "message bot";
+            chatBox.appendChild(botMessage);
+
+            let fullText = botReply.replace(/\n/g, "<br>");
+            let index = 0;
+
+        function typeCharacter() {
+            if (index < botReply.length) {
+                    botMessage.textContent = botReply.substring(0, index + 1); // type raw text only
+                    index++;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    setTimeout(typeCharacter, 15); // Typing speed
+                } else {
+                    // After typing is done, replace with formatted HTML
+                    let fullHTML = botReply
+                        .replace(/(?:\r\n|\r|\n)/g, "<br>")
+                        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+                    botMessage.innerHTML = `${fullHTML}<span class="timestamp">${getCurrentTimestamp()}</span>`;
+                    saveMessage("bot", botReply);
+                }
+            }
+
+            // Small delay before typing starts
+            setTimeout(typeCharacter, 50);
+
             } catch (error) {
                 console.error("❌ Chatbot request failed:", error);
 
-                // Ensure typing indicator is removed on error
-                if (typingIndicator.parentNode === chatBox) {
-                    chatBox.removeChild(typingIndicator);
-                }
-
-                let errorMessage = document.createElement("div");
-                errorMessage.className = "message bot";
-                errorMessage.textContent = "Error connecting to chatbot.";
-                chatBox.appendChild(errorMessage);
-                chatBox.scrollTop = chatBox.scrollHeight;
+            if (typingIndicator.parentNode === chatBox) {
+                chatBox.removeChild(typingIndicator);
             }
 
-            setTimeout(() => {
-                userInputElem.disabled = false;
-                sendBtn.disabled = false;
-            }, 2500);
+            let errorMessage = document.createElement("div");
+            errorMessage.className = "message bot";
+            errorMessage.textContent = "Error connecting to chatbot.";
+            chatBox.appendChild(errorMessage);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        setTimeout(() => {
+            userInputElem.disabled = false;
+            sendBtn.disabled = false;
+        }, 2500);
+    }
+
+        function trackAnalytics(sender) {
+            let analytics = JSON.parse(localStorage.getItem("chatAnalytics")) || {
+                totalMessages: 0,
+                userMessages: 0,
+                botMessages: 0,
+                startTime: null,
+                endTime: null
+        };
+
+        if (!analytics.startTime) {
+            analytics.startTime = new Date().toISOString();
+        }
+
+        analytics.totalMessages++;
+        if (sender === "user") {
+            analytics.userMessages++;
+        } else {
+            analytics.botMessages++;
+        }
+
+        analytics.endTime = new Date().toISOString();
+        localStorage.setItem("chatAnalytics", JSON.stringify(analytics));
+
+        // ✅ Send to backend analytics endpoint
+        fetch("https://chatbot-ai-9vfs.onrender.com/analytics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                event: sender === "user" ? "user_message" : "bot_response",
+                totalMessages: analytics.totalMessages,
+                userMessages: analytics.userMessages,
+                botMessages: analytics.botMessages,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(err => {
+            console.error("Analytics logging failed:", err);
+        });
+    }
+        function downloadChatHistory() {
+            const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+            if (history.length === 0) {
+                alert("No chat history to download.");
+                return;
+            }
+
+            let textContent = history.map(msg => {
+                return `[${msg.timestamp}] ${msg.sender.toUpperCase()}: ${msg.text}`;
+            }).join("\n\n");
+
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "chat-history.txt";
+            a.click();
+            URL.revokeObjectURL(url);
+
+            clearChatHistory(); // ✅ Clear after download
+    }
+
+        function clearChatHistory() {
+            localStorage.removeItem("chatHistory");
+            document.getElementById("chatBox").innerHTML = "";
+    }
 
         document.getElementById("userInput").addEventListener("keypress", function (event) {
             if (event.key === "Enter") {
