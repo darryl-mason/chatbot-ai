@@ -76,18 +76,18 @@
                 flex-direction: column;
                 background: var(--bg-color);
                 color: var(--text-color);
+                scroll-behavior: smooth;
             }
     
             .message {
                 padding: 10px;
-                margin: 5px;
+                margin-bottom: 1rem;
                 border-radius: 10px;
                 max-width: 80%;
                 word-wrap: break-word;
-                overflow-wrap: break-word;
-                white-space: normal;
+                overflow: visible;
+                white-space: pre-wrap; /* keeps newlines but wraps long lines */
             }
-
     
             .user {
                 align-self: flex-end;
@@ -332,12 +332,11 @@
                     chatBox.scrollTop = chatBox.scrollHeight;
                     setTimeout(typeCharacter, 15); // Typing speed
                 } else {
-                    // After typing is done, replace with formatted HTML
-                    let fullHTML = botReply
-                        .replace(/(?:\r\n|\r|\n)/g, "<br>")
-                        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
-
-                    botMessage.innerHTML = `${fullHTML}<span class="timestamp">${getCurrentTimestamp()}</span>`;
+                    botMessage.textContent = botReply;
+                    let timestamp = document.createElement("span");
+                    timestamp.className = "timestamp";
+                    timestamp.textContent = getCurrentTimestamp();
+                    botMessage.appendChild(timestamp);
                     saveMessage("bot", botReply);
                 }
                     setTimeout(() => {
