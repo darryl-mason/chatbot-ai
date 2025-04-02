@@ -1,223 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Chatbot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: var(--bg-color);
-            margin: 0;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Enhanced Chatbot</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            /* Responsive Polish Updates */
+            body {
+                font-family: Arial, sans-serif;
+                background-color: var(--bg-color);
+                margin: 0;
+                overflow: hidden; /* Prevent double scroll */
+                height: 100dvh; /* Modern dynamic viewport */
+                display: flex;
+                justify-content: center;
+            }
     
-        :root {
-            --bg-color: #f4f4f9;
-            --bot-color: #e0e0e0;
-            --user-color: #007bff;
-            --text-color: #000;
-        }
+            :root {
+                --bg-color: #f4f4f9;
+                --bot-color: #e0e0e0;
+                --user-color: #007bff;
+                --text-color: #000;
+            }
     
-        .dark-mode {
-            --bg-color: #1e1e1e;
-            --bot-color: #2a2a2a;
-            --user-color: #007bff;
-            --text-color: #fff;
-        }
+            .dark-mode {
+                --bg-color: #1e1e1e;
+                --bot-color: #2a2a2a;
+                --user-color: #007bff;
+                --text-color: #fff;
+            }
     
-        .chat-container {
-            width: 100%;
-            max-width: 420px;
-            height: 90vh;
-            display: flex;
-            flex-direction: column;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            position: relative;
-        }
-    
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--user-color);
-            color: white;
-            padding: 15px;
-            font-size: 18px;
-        }
-    
-        .toggle-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .toggle-switch {
-            margin-left: auto; /* Push to the right */
-            cursor: pointer;
-            background: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            color: black;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .toggle-mode {
-            background: transparent;  /* Removes any white background */
-            border: none;  /* Removes button border */
-            color: inherit;  /* Inherits text color from the header */
-            font-size: 18px;  /* Adjusts icon size */
-            cursor: pointer;
-            margin-left: auto;  /* Pushes it to the right */
-            padding: 5px;  /* Adds spacing */
-        }
-        
-        .toggle-mode:focus {
-            outline: none;  /* Removes focus outline */
-        }
-
-        .timestamp {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.8);  /* Lightened white for visibility */
-            display: block;
-            text-align: right;
-            margin-top: 3px;
-        }
-
-        .user .timestamp {
-            color: rgba(255, 255, 255, 0.9);  /* Brighter white for blue background */
-        }
-
-        .bot .timestamp {
-            text-align: left;
-        }
-
-        /* Light Mode (default) */
-        body:not(.dark-mode) .bot .timestamp {
-            color: rgba(0, 0, 0, 0.6);
-        }
-
-        /* Dark Mode */
-        body.dark-mode .bot .timestamp {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .chat-box {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        /* ✅ Bullet List Fix */
-        .chat-box ul {
-            padding-left: 20px; /* Ensures proper bullet indentation */
-            margin: 5px 0; /* Reduces excessive spacing */
-            list-style-type: disc; /* Ensures normal bullet points */
-        }
-
-        .chat-box li {
-            margin-bottom: 5px; /* Proper spacing between bullets */
-            padding-left: 5px; /* Fine-tunes alignment */
-            list-style-position: outside; /* ✅ Fixes bullet alignment */
-        }
-    
-        .message {
-            padding: 10px;
-            margin: 5px;
-            border-radius: 10px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-    
-        .user {
-            align-self: flex-end;
-            background: var(--user-color);
-            color: white;
-        }
-    
-        .bot {
-            align-self: flex-start;
-            background: var(--bot-color);
-            color: var(--text-color);
-        }
-    
-        .loading {
-            text-align: center;
-            font-size: 14px;
-            color: gray;
-            margin: 10px 0;
-            font-weight: bold;
-            animation: blink 1.2s infinite ease-in-out;
-        }
-    
-        @keyframes blink {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
-        }
-    
-        .chat-input {
-            display: flex;
-            border-top: 1px solid #ccc;
-            background: white;
-        }
-    
-        .chat-input input {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            outline: none;
-            font-size: 16px;
-        }
-    
-        .chat-input button {
-            background: var(--user-color);
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    
-        /* Responsive Design */
-        @media screen and (max-width: 600px) {
             .chat-container {
                 width: 100%;
-                height: 100vh;
-                border-radius: 0;
+                max-width: 420px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+    
+            .chat-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: var(--user-color);
+                color: white;
+                padding: 15px;
+                font-size: 18px;
+            }
+    
+            .toggle-mode {
+                background: transparent;
+                border: none;
+                color: inherit;
+                font-size: 18px;
+                cursor: pointer;
+                margin-left: auto;
+                padding: 5px;
+            }
+    
+            .chat-box {
+                flex-grow: 1;
+                overflow-y: auto;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                background: var(--bg-color);
+                color: var(--text-color);
+            }
+    
+            .message {
+                padding: 10px;
+                margin: 5px;
+                border-radius: 10px;
+                max-width: 80%;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+            }
+
+    
+            .user {
+                align-self: flex-end;
+                background: var(--user-color);
+                color: white;
+            }
+    
+            .bot {
+                align-self: flex-start;
+                background: var(--bot-color);
+                color: var(--text-color);
+            }
+    
+            .timestamp {
+                font-size: 10px;
+                display: block;
+                text-align: right;
+                margin-top: 3px;
             }
     
             .chat-input {
-                position: fixed;
-                bottom: 0;
-                width: 100%;
                 display: flex;
-                padding: 10px;
+                border-top: 1px solid #ccc;
                 background: white;
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
             }
-
+    
             .chat-input input {
                 flex: 1;
-                padding: 12px;
+                padding: 15px;
+                border: none;
+                outline: none;
+                font-size: 16px;
             }
     
             .chat-input button {
-                padding: 12px;
+                background: var(--user-color);
+                color: white;
+                border: none;
+                padding: 15px;
+                font-size: 16px;
+                cursor: pointer;
             }
-        }
-    </style>
     
-</head>
+            #chat-controls {
+                padding: 10px 10px 0 10px;
+                background: var(--bg-color);
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+    
+            #chat-controls button {
+                padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+    
+            #endBtn {
+                background: #dc3545;
+                color: white;
+            }
+    
+            #downloadBtn {
+                background: #007bff;
+                color: white;
+                display: none;
+            }
+    
+            /* 🌐 Responsive Enhancements */
+            @media screen and (max-width: 768px) {
+                .chat-container {
+                    height: calc(var(--vh, 1vh) * 100);
+                    max-width: 100%;
+                    border-radius: 0;
+                }
+    
+                .chat-header {
+                    font-size: 16px;
+                    padding: 12px;
+                }
+    
+                .chat-input input, .chat-input button {
+                    padding: 12px;
+                    font-size: 15px;
+                }
+    
+                #chat-controls {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 5px;
+                }
+    
+                #chat-controls button {
+                    width: 90%;
+                }
+            }
+    
+            @media screen and (max-width: 480px) {
+                .chat-header {
+                    font-size: 15px;
+                    padding: 10px;
+                }
+    
+                .chat-input input, .chat-input button {
+                    font-size: 14px;
+                    padding: 10px;
+                }
+    
+                .message {
+                    font-size: 14px;
+                }
+            }
+        </style>
+    </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
@@ -225,15 +215,15 @@
             <button class="toggle-mode" onclick="toggleDarkMode()">🌙</button>
         </div>
         <div class="chat-box" id="chatBox"></div>
+        <!-- ✅ Button controls inside the chat container -->
+        <div id="chat-controls">
+            <button id="endBtn" onclick="endChat()">🔚 End Chat</button>
+            <button id="downloadBtn" onclick="downloadChatHistory()">📥 Download Chat</button>
+        </div>        
         <div class="chat-input">
             <input type="text" id="userInput" placeholder="Type a message..." disabled>
             <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
         </div>
-    </div>
-
-    <div style="text-align: center; padding: 10px;">
-        <button onclick="downloadChatHistory()">📥 Download Chat</button>
-        <button onclick="clearChatHistory()">🧹 Clear Chat</button>
     </div>
 
     <script>
@@ -350,6 +340,9 @@
                     botMessage.innerHTML = `${fullHTML}<span class="timestamp">${getCurrentTimestamp()}</span>`;
                     saveMessage("bot", botReply);
                 }
+                    setTimeout(() => {
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }, 100);
             }
 
             // Small delay before typing starts
@@ -421,7 +414,11 @@
             }
 
             let textContent = history.map(msg => {
-                return `[${msg.timestamp}] ${msg.sender.toUpperCase()}: ${msg.text}`;
+                // Create a temporary div to convert HTML to plain text
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = msg.text;
+                const plainText = tempDiv.textContent || tempDiv.innerText || "";
+                return `[${msg.timestamp}] ${msg.sender.toUpperCase()}: ${plainText}`;
             }).join("\n\n");
 
             const blob = new Blob([textContent], { type: 'text/plain' });
@@ -441,12 +438,33 @@
             document.getElementById("chatBox").innerHTML = "";
     }
 
-        document.getElementById("userInput").addEventListener("keypress", function (event) {
+        function endChat() {
+            document.getElementById("userInput").disabled = true;
+            document.getElementById("sendBtn").disabled = true;
+
+            // ✅ Reveal the download button
+            document.getElementById("downloadBtn").style.display = "inline-block";
+
+            // ✅ Hide the end button
+            document.getElementById("endBtn").style.display = "none";
+
+            document.getElementById("userInput").placeholder = "Chat ended.";
+    }
+            document.getElementById("userInput").addEventListener("keypress", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 sendMessage();
             }
         });
-    </script>
-</body>
+        
+        function setChatHeight() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+        window.addEventListener('resize', setChatHeight);
+        window.addEventListener('load', setChatHeight);
+
+        </script>
+    </body>
 </html>
