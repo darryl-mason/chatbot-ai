@@ -10,6 +10,9 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+def strip_html_tags(text):
+    return re.sub(r'<[^>]*?>', '', text)
+
 # Get your Gemini API Key from environment variables
 API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
 
@@ -39,15 +42,15 @@ def chat():
         response_data = response.json()
         bot_reply = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure how to respond to that.")
 
-        # ✅ Fix Markdown issues before converting
+        # ✅ Remove empty bullets and fix list formatting
         bot_reply = re.sub(r"^\s*[\*\-]\s*$", "", bot_reply, flags=re.MULTILINE)  # Remove bullets with no content
         bot_reply = re.sub(r"(\n\s*-|\n\s*\d+\.)", r"\n\n\1", bot_reply)  # Ensure proper list spacing
-        bot_reply = re.sub(r"(\n\s*\*\s*\n)", r"\n", bot_reply)  # Remove empty bullet points
 
-        # ✅ Convert Markdown reply to clean HTML
-        html_response = markdown.markdown(bot_reply, extensions=["extra"])
 
-        return jsonify({ "response": html_response })
+        # ✅ Strip all HTML tags (including any markdown conversions)
+        clean_reply = strip_html_tags(bot_reply)
+
+        return jsonify({ "response": clean_reply })
 
     else:
         return jsonify({
