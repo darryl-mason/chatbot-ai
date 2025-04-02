@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 import requests
 import os
+import re
 import markdown
 from flask_cors import CORS
+import json
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -34,12 +37,14 @@ def chat():
 
     if response.status_code == 200:
         response_data = response.json()
-
-        # Extract text safely
         bot_reply = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure how to respond to that.")
 
-        # Convert Markdown reply from Gemini to clean HTML
-        html_response = markdown.markdown(bot_reply)
+        # ✅ Fix Markdown inconsistencies before converting
+        bot_reply = re.sub(r"(\n\s*-|\n\s*\d+\.)", r"\n\n\1", bot_reply)  # Ensure proper list spacing
+        bot_reply = re.sub(r"(\n\s*\*\s*\n)", r"\n", bot_reply)  # Remove empty bullet points
+
+        # ✅ Convert Markdown reply to clean HTML
+        html_response = markdown.markdown(bot_reply, extensions=["extra"])
 
         return jsonify({ "response": html_response })
 
@@ -49,6 +54,18 @@ def chat():
             "status_code": response.status_code,
             "details": response.text
         }), response.status_code
+
+@app.route("/analytics", methods=["POST"])
+def analytics():
+    data = request.json
+
+    data['timestamp'] = datetime.utcnow().isoformat()
+
+    log_file = 'analytics_log.json'
+    with open(log_file, 'a') as f:
+        f.write(json.dumps(data) + '\n')
+
+    return jsonify({'status': 'logged'})
 
 if __name__ == '__main__':
     app.run(debug=True)
