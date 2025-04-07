@@ -21,24 +21,21 @@
         
             * {
                 box-sizing: border-box;
-                max-width: 100%;
-                overflow-x: hidden;
             }
         
-            body {
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
                 font-family: Arial, sans-serif;
                 background-color: var(--bg-color);
-                margin: 0;
-                height: 100dvh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
             }
         
             .chat-container {
-                width: 100%;
                 max-width: 420px;
-                height: 100%;
+                height: 100vh;
+                margin: 0 auto;
                 display: flex;
                 flex-direction: column;
                 background: white;
@@ -47,8 +44,13 @@
                 overflow: hidden;
             }
         
-            .chat-header {
+            .chat-header,
+            .chat-input,
+            #chat-controls {
                 flex-shrink: 0;
+            }
+        
+            .chat-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -64,7 +66,6 @@
                 color: inherit;
                 font-size: 18px;
                 cursor: pointer;
-                margin-left: auto;
                 padding: 5px;
             }
         
@@ -72,11 +73,11 @@
                 flex-grow: 1;
                 overflow-y: auto;
                 padding: 10px;
-                display: flex;
-                flex-direction: column;
                 background: var(--bg-color);
                 color: var(--text-color);
                 scroll-behavior: smooth;
+                display: flex;
+                flex-direction: column;
             }
         
             .message {
@@ -84,9 +85,8 @@
                 margin-bottom: 1rem;
                 border-radius: 10px;
                 max-width: 80%;
-                overflow: hidden;
+                overflow-wrap: break-word;
                 white-space: pre-wrap;
-                word-wrap: break-word;
             }
         
             .user {
@@ -109,7 +109,6 @@
             }
         
             #chat-controls {
-                flex-shrink: 0;
                 padding: 10px;
                 background: var(--bg-color);
                 display: flex;
@@ -138,7 +137,6 @@
             }
         
             .chat-input {
-                flex-shrink: 0;
                 display: flex;
                 border-top: 1px solid #ccc;
                 background: white;
@@ -164,6 +162,7 @@
             @media screen and (max-width: 768px) {
                 .chat-container {
                     border-radius: 0;
+                    max-width: 100%;
                 }
         
                 .chat-input input, .chat-input button {
@@ -280,11 +279,11 @@
                 console.log("✅ Response received!", result);
 
                 let botReply = result.response || "I didn't understand that.";
-                    // Remove markdown bullets and asterisks
                     botReply = botReply
-                        .replace(/^\s*[\*\-]\s*/gm, '')  // remove * and - at line starts
-                        .replace(/\*\*(.*?)\*\*/g, '$1') // remove bold markdown
-                        .replace(/\*(.*?)\*/g, '$1');    // remove italics
+                        .replace(/^#+\s*(.*)/gm, '$1')         // remove markdown headings (##)
+                        .replace(/^\s*[\*\-]\s*/gm, '')        // remove * or - bullets
+                        .replace(/\*\*(.*?)\*\*/g, '$1')       // remove bold
+                        .replace(/\*(.*?)\*/g, '$1');          // remove italics
 
             // Remove typing indicator
             if (typingIndicator.parentNode === chatBox) {
