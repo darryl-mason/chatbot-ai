@@ -5,37 +5,36 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Enhanced Chatbot</title>
         <style>
-            * {
-                box-sizing: border-box;
-                max-width: 100%;
-                overflow-x: hidden;
-            }
-            
-            /* Responsive Polish Updates */
-            body {
-                font-family: Arial, sans-serif;
-                background-color: var(--bg-color);
-                margin: 0;
-                overflow: hidden; /* Prevent double scroll */
-                height: 100dvh; /* Modern dynamic viewport */
-                display: flex;
-                justify-content: center;
-            }
-    
             :root {
                 --bg-color: #f4f4f9;
                 --bot-color: #e0e0e0;
                 --user-color: #007bff;
                 --text-color: #000;
             }
-    
+        
             .dark-mode {
                 --bg-color: #1e1e1e;
                 --bot-color: #2a2a2a;
                 --user-color: #007bff;
                 --text-color: #fff;
             }
-    
+        
+            * {
+                box-sizing: border-box;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+        
+            body {
+                font-family: Arial, sans-serif;
+                background-color: var(--bg-color);
+                margin: 0;
+                height: 100dvh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
             .chat-container {
                 width: 100%;
                 max-width: 420px;
@@ -47,8 +46,9 @@
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
             }
-    
+        
             .chat-header {
+                flex-shrink: 0;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -57,7 +57,7 @@
                 padding: 15px;
                 font-size: 18px;
             }
-    
+        
             .toggle-mode {
                 background: transparent;
                 border: none;
@@ -67,7 +67,7 @@
                 margin-left: auto;
                 padding: 5px;
             }
-    
+        
             .chat-box {
                 flex-grow: 1;
                 overflow-y: auto;
@@ -78,45 +78,72 @@
                 color: var(--text-color);
                 scroll-behavior: smooth;
             }
-    
+        
             .message {
                 padding: 10px;
                 margin-bottom: 1rem;
                 border-radius: 10px;
                 max-width: 80%;
                 overflow: hidden;
-                word-wrap: break-word;
                 white-space: pre-wrap;
+                word-wrap: break-word;
             }
-    
+        
             .user {
                 align-self: flex-end;
                 background: var(--user-color);
                 color: white;
             }
-    
+        
             .bot {
                 align-self: flex-start;
                 background: var(--bot-color);
                 color: var(--text-color);
             }
-    
+        
             .timestamp {
                 font-size: 10px;
                 display: block;
                 text-align: right;
                 margin-top: 3px;
             }
-    
+        
+            #chat-controls {
+                flex-shrink: 0;
+                padding: 10px;
+                background: var(--bg-color);
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+        
+            #chat-controls button {
+                padding: 10px 20px;
+                font-size: 14px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        
+            #endBtn {
+                background: #dc3545;
+                color: white;
+            }
+        
+            #downloadBtn {
+                background: #007bff;
+                color: white;
+                display: none;
+            }
+        
             .chat-input {
+                flex-shrink: 0;
                 display: flex;
                 border-top: 1px solid #ccc;
                 background: white;
-                position: sticky;
-                bottom: 0;
-                z-index: 10;
             }
-    
+        
             .chat-input input {
                 flex: 1;
                 padding: 15px;
@@ -124,7 +151,7 @@
                 outline: none;
                 font-size: 16px;
             }
-    
+        
             .chat-input button {
                 background: var(--user-color);
                 color: white;
@@ -133,80 +160,22 @@
                 font-size: 16px;
                 cursor: pointer;
             }
-    
-            #chat-controls {
-                padding: 10px 10px 0 10px;
-                background: var(--bg-color);
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-    
-            #chat-controls button {
-                padding: 10px 20px;
-                font-size: 14px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-    
-            #endBtn {
-                background: #dc3545;
-                color: white;
-            }
-    
-            #downloadBtn {
-                background: #007bff;
-                color: white;
-                display: none;
-            }
-    
-            /* 🌐 Responsive Enhancements */
+        
             @media screen and (max-width: 768px) {
                 .chat-container {
-                    height: calc(var(--vh, 1vh) * 100);
-                    max-width: 100%;
                     border-radius: 0;
                 }
-    
-                .chat-header {
-                    font-size: 16px;
-                    padding: 12px;
-                }
-    
+        
                 .chat-input input, .chat-input button {
                     padding: 12px;
                     font-size: 15px;
                 }
-    
-                #chat-controls {
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 5px;
-                }
-    
-                #chat-controls button {
-                    width: 90%;
-                }
-            }
-    
-            @media screen and (max-width: 480px) {
-                .chat-header {
-                    font-size: 15px;
-                    padding: 10px;
-                }
-    
-                .chat-input input, .chat-input button {
-                    font-size: 14px;
-                    padding: 10px;
-                }
-    
+        
                 .message {
                     font-size: 14px;
                 }
             }
-        </style>
+        </style>        
     </head>
 <body>
     <div class="chat-container">
@@ -311,8 +280,11 @@
                 console.log("✅ Response received!", result);
 
                 let botReply = result.response || "I didn't understand that.";
-                    botReply = botReply.replace(/\*\*(.*?)\*\*/g, '$1'); // remove **bold**
-                    botReply = botReply.replace(/\*(.*?)\*/g, '$1');     // remove *italics*
+                    // Remove markdown bullets and asterisks
+                    botReply = botReply
+                        .replace(/^\s*[\*\-]\s*/gm, '')  // remove * and - at line starts
+                        .replace(/\*\*(.*?)\*\*/g, '$1') // remove bold markdown
+                        .replace(/\*(.*?)\*/g, '$1');    // remove italics
 
             // Remove typing indicator
             if (typingIndicator.parentNode === chatBox) {
