@@ -84,9 +84,9 @@
                 margin-bottom: 1rem;
                 border-radius: 10px;
                 max-width: 80%;
+                overflow: hidden;
                 word-wrap: break-word;
-                overflow: visible;
-                white-space: pre-wrap; /* keeps newlines but wraps long lines */
+                white-space: pre-wrap;
             }
     
             .user {
@@ -311,6 +311,8 @@
                 console.log("✅ Response received!", result);
 
                 let botReply = result.response || "I didn't understand that.";
+                    botReply = botReply.replace(/\*\*(.*?)\*\*/g, '$1'); // remove **bold**
+                    botReply = botReply.replace(/\*(.*?)\*/g, '$1');     // remove *italics*
 
             // Remove typing indicator
             if (typingIndicator.parentNode === chatBox) {
