@@ -183,8 +183,9 @@
             <span>Chatbot Assistant</span>
             <button class="toggle-mode" onclick="toggleDarkMode()">🌙</button>
         </div>
-        <div class="chat-box" id="chatBox"></div>
-        <div id="chat-quick-buttons" style="padding: 10px;"></div>
+        <div class="chat-box" id="chatBox">
+            <div id="chat-quick-buttons" style="padding: 10px;"></div>
+        </div>
         <!-- ✅ Button controls inside the chat container -->
         <div id="chat-controls">
             <button id="endBtn" onclick="endChat()">🔚 End Chat</button>
@@ -462,18 +463,21 @@
 
         function renderQuickMenu() {
             const quickContainer = document.getElementById("chat-quick-buttons");
+
             quickContainer.innerHTML = `
-                <p><strong>👋 Hi there! I’m your virtual support assistant.</strong><br>
-                I can help with your order, shipping, returns, and more — available 24/7!</p>
-                <p><strong>Need help with something?</strong></p>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="showSubmenu('orders')">🛒 Orders</button>
-                    <button onclick="showSubmenu('shipping')">🚚 Shipping</button>
-                    <button onclick="showSubmenu('returns')">🔁 Returns</button>
-                    <button onclick="showSubmenu('product')">📦 Products</button>
-                    <button onclick="connectAgent()">💬 Live Agent</button>
+                <div class="message bot">
+                    <p><strong>👋 Hi there! I’m your virtual support assistant.</strong><br>
+                    I can help with your order, shipping, returns, and more — available 24/7!</p>
+                    <p><strong>Need help with something?</strong></p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                        <button onclick="showSubmenu('orders')">🛒 Orders</button>
+                        <button onclick="showSubmenu('shipping')">🚚 Shipping</button>
+                        <button onclick="showSubmenu('returns')">🔁 Returns</button>
+                        <button onclick="showSubmenu('product')">📦 Products</button>
+                        <button onclick="connectAgent()">💬 Live Agent</button>
+                    </div>
+                    <div id="submenu" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                 </div>
-                <div id="submenu" style="margin-top: 10px;"></div>
             `;
         }
 
@@ -481,8 +485,9 @@
             const submenu = submenuData[category];
             const submenuContainer = document.getElementById("submenu");
 
-            submenuContainer.innerHTML = '<p><strong>Choose a question:</strong></p>' +
-                submenu.map(q => `<button onclick="autoFillInput('${q}')">${q}</button>`).join('');
+            submenuContainer.innerHTML = submenu.map(q =>
+                `<button style="white-space: nowrap;" onclick="autoFillInput('${q}')">${q}</button>`
+            ).join('');
         }
 
         function autoFillInput(text) {
