@@ -194,6 +194,8 @@
             <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
         </div>
     </div>
+        <div id="chat-quick-buttons" style="padding: 10px;">
+    </div>
 
     <script>
         function toggleDarkMode() {
@@ -232,6 +234,7 @@
             document.getElementById("userInput").disabled = false;
             document.getElementById("sendBtn").disabled = false;
             // loadHistory(); // 🧹 Disabled to prevent chat from reloading on refresh
+            renderQuickMenu();
         };
 
         async function sendMessage() {
@@ -434,6 +437,63 @@
             const vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
+        const submenuData = {
+            orders: [
+                "Where is my order?",
+                "Can I change or cancel my order?",
+                "When will [product] be back in stock?"
+            ],
+            shipping: [
+                "Do you ship to my location?",
+                "How much is shipping?",
+                "When will my order arrive?"
+            ],
+            returns: [
+                "What's your return or exchange policy?",
+                "How do I start a return or exchange?",
+                "Where is my return label?"
+            ],
+            product: [
+                "Do you have my size in stock?",
+                "What’s the difference between these two products?",
+                "Are your products sustainable or ethically made?",
+                "How do I care for this product?"
+            ]
+        };
+
+        function renderQuickMenu() {
+            const quickContainer = document.getElementById("chat-quick-buttons");
+            quickContainer.innerHTML = `
+                <p><strong>Need help with something?</strong></p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="showSubmenu('orders')">🛒 Orders</button>
+                    <button onclick="showSubmenu('shipping')">🚚 Shipping</button>
+                    <button onclick="showSubmenu('returns')">🔁 Returns</button>
+                    <button onclick="showSubmenu('product')">📦 Products</button>
+                    <button onclick="connectAgent()">💬 Live Agent</button>
+                </div>
+                <div id="submenu"></div>
+            `;
+        }
+
+        function showSubmenu(category) {
+            const submenu = submenuData[category];
+            const submenuContainer = document.getElementById("submenu");
+
+            submenuContainer.innerHTML = '<p><strong>Choose a question:</strong></p>' +
+                submenu.map(q => `<button onclick="autoFillInput('${q}')">${q}</button>`).join('');
+        }
+
+        function autoFillInput(text) {
+            const input = document.getElementById("userInput");
+            input.value = text;
+            input.focus();
+        }
+
+        function connectAgent() {
+            const submenuContainer = document.getElementById("submenu");
+            submenuContainer.innerHTML = '<p>Connecting you with a live agent...</p>';
+        }
 
         window.addEventListener('resize', setChatHeight);
         window.addEventListener('load', setChatHeight);
