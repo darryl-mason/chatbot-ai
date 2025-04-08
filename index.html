@@ -465,10 +465,11 @@
             const quickContainer = document.getElementById("chat-quick-buttons");
 
             quickContainer.innerHTML = `
-                <div class="message bot">
-                    <p><strong>👋 Hi there! I’m your virtual support assistant.</strong><br>
-                    I can help with your order, shipping, returns, and more — available 24/7!</p>
-                    <p><strong>Need help with something?</strong></p>
+                <div style="padding: 10px 0; border-bottom: 1px solid #ccc;">
+                    <p style="margin: 0 0 5px 0;"><strong>👋 Hi there! I’m your virtual support assistant.</strong></p>
+                    <p style="margin: 0 0 10px 0;">I can help with your order, shipping, returns, and more — available 24/7.</p>
+
+                    <p style="margin: 0 0 5px 0;"><strong>Need help with something?</strong></p>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
                         <button onclick="showSubmenu('orders')">🛒 Orders</button>
                         <button onclick="showSubmenu('shipping')">🚚 Shipping</button>
