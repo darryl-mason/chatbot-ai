@@ -1,509 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Enhanced Chatbot</title>
-        <style>
-            :root {
-                --bg-color: #f4f4f9;
-                --bot-color: #e0e0e0;
-                --user-color: #007bff;
-                --text-color: #000;
-            }
-        
-            .dark-mode {
-                --bg-color: #1e1e1e;
-                --bot-color: #2a2a2a;
-                --user-color: #007bff;
-                --text-color: #fff;
-            }
-        
-            * {
-                box-sizing: border-box;
-            }
-        
-            html, body {
-                margin: 0;
-                padding: 0;
-                height: 100%;
-                overflow-y: auto; /* ✅ Allow full-page vertical scroll */
-                font-family: Arial, sans-serif;
-                background-color: var(--bg-color);
-            }
-        
-            .chat-container {
-                max-width: 420px;
-                height: 100dvh;
-                margin: 0 auto;
-                display: flex;
-                flex-direction: column;
-                background: white;
-                border-radius: 10px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-            }
-        
-            .chat-header,
-            .chat-input,
-            #chat-controls {
-                flex-shrink: 0;
-            }
-        
-            .chat-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: var(--user-color);
-                color: white;
-                padding: 15px;
-                font-size: 18px;
-            }
-        
-            .toggle-mode {
-                background: transparent;
-                border: none;
-                color: inherit;
-                font-size: 18px;
-                cursor: pointer;
-                padding: 5px;
-            }
-        
-            .chat-box {
-                flex-grow: 1;
-                overflow-y: auto;
-                padding: 10px;
-                background: var(--bg-color);
-                color: var(--text-color);
-                scroll-behavior: smooth;
-                display: flex;
-                flex-direction: column;
-                min-height: 0; /* 💡 Fixes flex-child shrink issues */
-            }
-        
-            .message {
-                padding: 10px;
-                margin-bottom: 1rem;
-                border-radius: 10px;
-                max-width: 80%;
-                overflow-wrap: break-word;
-                white-space: pre-wrap;
-            }
-        
-            .user {
-                align-self: flex-end;
-                background: var(--user-color);
-                color: white;
-            }
-        
-            .bot {
-                align-self: flex-start;
-                background: var(--bot-color);
-                color: var(--text-color);
-            }
-        
-            .timestamp {
-                font-size: 10px;
-                display: block;
-                text-align: right;
-                margin-top: 3px;
-            }
-        
-            #chat-controls {
-                padding: 10px;
-                background: var(--bg-color);
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-        
-            #chat-controls button {
-                padding: 10px 20px;
-                font-size: 14px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-        
-            #endBtn {
-                background: #dc3545;
-                color: white;
-            }
-        
-            #downloadBtn {
-                background: #007bff;
-                color: white;
-                display: none;
-            }
-        
-            .chat-input {
-                display: flex;
-                border-top: 1px solid #ccc;
-                background: white;
-            }
-        
-            .chat-input input {
-                flex: 1;
-                padding: 15px;
-                border: none;
-                outline: none;
-                font-size: 16px;
-            }
-        
-            .chat-input button {
-                background: var(--user-color);
-                color: white;
-                border: none;
-                padding: 15px;
-                font-size: 16px;
-                cursor: pointer;
-            }
-        
-            @media screen and (max-width: 768px) {
-                .chat-container {
-                    border-radius: 0;
-                    max-width: 100%;
-                }
-        
-                .chat-input input, .chat-input button {
-                    padding: 12px;
-                    font-size: 15px;
-                }
-        
-                .message {
-                    font-size: 14px;
-                }
-            }
-        </style>        
-    </head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Widget</title>
+  <style>
+    :root {
+      --bg-color: #f4f4f9;
+      --bot-color: #e0e0e0;
+      --user-color: #007bff;
+      --text-color: #000;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+    }
+
+    /* Floating Chat Button */
+    #chat-toggle-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      background-color: #007bff;
+      color: white;
+      font-size: 20px;
+      border: none;
+      border-radius: 50%;
+      padding: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Chat Wrapper */
+    #chatbot-wrapper {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      z-index: 9998;
+    }
+
+    /* Chat Container */
+    .chat-container {
+      width: 360px;
+      height: 600px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: var(--user-color);
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-box {
+      flex-grow: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+      background: white;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+
+    .chat-input button {
+      background: var(--user-color);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
 <body>
+  <!-- Floating Widget Button -->
+  <button id="chat-toggle-btn" onclick="toggleChat()">💬</button>
+
+  <!-- Chatbot Wrapper -->
+  <div id="chatbot-wrapper">
     <div class="chat-container">
-        <div class="chat-header">
-            <span>Chatbot Assistant</span>
-            <button class="toggle-mode" onclick="toggleDarkMode()">🌙</button>
+      <div class="chat-header">
+        <span>Chatbot Assistant</span>
+        <button onclick="toggleChat()">✖️</button>
+      </div>
+      <div class="chat-box" id="chatBox">
+        <div style="padding: 10px 0; border-bottom: 1px solid #ccc;">
+          <p style="margin: 0 0 5px 0;"><strong>👋 Hi there! I’m your virtual support assistant.</strong></p>
+          <p style="margin: 0 0 10px 0;">I can help with your order, shipping, returns, and more — available 24/7.</p>
+
+          <p style="margin: 0 0 5px 0;"><strong>Need help with something?</strong></p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <button>🛒 Orders</button>
+            <button>🚚 Shipping</button>
+            <button>🔁 Returns</button>
+            <button>📦 Products</button>
+            <button>💬 Live Agent</button>
+          </div>
         </div>
-        <div id="chat-quick-buttons" style="padding: 10px;"></div>
-        <div class="chat-box" id="chatBox"></div>
-        <!-- ✅ Button controls inside the chat container -->
-        <div id="chat-controls">
-            <button id="endBtn" onclick="endChat()">🔚 End Chat</button>
-            <button id="downloadBtn" onclick="downloadChatHistory()">📥 Download Chat</button>
-        </div>        
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="Type a message..." disabled>
-            <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
-        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" placeholder="Type a message...">
+        <button>Send</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-            let button = document.querySelector(".toggle-mode");
-            button.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
-        }
-
-        function getCurrentTimestamp() {
-            const now = new Date();
-            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function saveMessage(sender, text) {
-            const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
-            history.push({ sender, text, timestamp: getCurrentTimestamp() });
-            localStorage.setItem("chatHistory", JSON.stringify(history));
-        }   
-
-        function loadHistory() {
-            const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
-            let chatBox = document.getElementById("chatBox");
-
-            history.forEach((msg) => {
-                let message = document.createElement("div");
-                message.className = `message ${msg.sender}`;
-                message.innerHTML = `${msg.text.replace(/\n/g, "<br>")} <span class="timestamp">${msg.timestamp || getCurrentTimestamp()}</span>`;
-                chatBox.appendChild(message);
-            });
-
-            // Ensure the chatbox scrolls to the most recent message
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        window.onload = function () {
-            document.getElementById("userInput").disabled = false;
-            document.getElementById("sendBtn").disabled = false;
-            // loadHistory(); // 🧹 Disabled to prevent chat from reloading on refresh
-            renderQuickMenu();
-        };
-
-        async function sendMessage() {
-            let userInputElem = document.getElementById("userInput");
-            let sendBtn = document.getElementById("sendBtn");
-            let chatBox = document.getElementById("chatBox");
-
-            let userInput = userInputElem.value.trim();
-            if (!userInput) return;
-
-            userInputElem.disabled = true;
-            sendBtn.disabled = true;
-
-            // Display user's message
-            let userMessage = document.createElement("div");
-            userMessage.className = "message user";
-            userMessage.innerHTML = `${userInput} <span class="timestamp">${getCurrentTimestamp()}</span>`;
-            chatBox.appendChild(userMessage);
-            saveMessage("user", userInput);
-            trackAnalytics("user"); // ✅ Add this line here
-            userInputElem.value = "";
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            // Remove any existing typing indicator
-            let existingTypingIndicator = document.getElementById("loading");
-            if (existingTypingIndicator) {
-                existingTypingIndicator.remove();
-            }
-
-            // Add typing indicator
-            let typingIndicator = document.createElement("div");
-            typingIndicator.className = "message bot loading";
-            typingIndicator.textContent = "Typing...";
-            typingIndicator.id = "loading";
-            chatBox.appendChild(typingIndicator);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            try {
-                let response = await fetch("https://chatbot-ai-9vfs.onrender.com/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: userInput })
-                });
-
-                let result = await response.json();
-                console.log("✅ Response received!", result);
-
-                let botReply = result.response || "I didn't understand that.";
-                    botReply = botReply
-                        .replace(/^#+\s*(.*)/gm, '$1')         // remove markdown headings (##)
-                        .replace(/^\s*[\*\-]\s*/gm, '')        // remove * or - bullets
-                        .replace(/\*\*(.*?)\*\*/g, '$1')       // remove bold
-                        .replace(/\*(.*?)\*/g, '$1');          // remove italics
-
-            // Remove typing indicator
-            if (typingIndicator.parentNode === chatBox) {
-                chatBox.removeChild(typingIndicator);
-            }
-
-            // Create bot message container
-            let botMessage = document.createElement("div");
-            botMessage.className = "message bot";
-            chatBox.appendChild(botMessage);
-
-            let fullText = botReply.replace(/\n/g, "<br>");
-            let index = 0;
-
-        function typeCharacter() {
-            if (index < botReply.length) {
-                    botMessage.textContent = botReply.substring(0, index + 1); // type raw text only
-                    index++;
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                    setTimeout(typeCharacter, 15); // Typing speed
-                } else {
-                    botMessage.textContent = botReply;
-                    let timestamp = document.createElement("span");
-                    timestamp.className = "timestamp";
-                    timestamp.textContent = getCurrentTimestamp();
-                    botMessage.appendChild(timestamp);
-                    saveMessage("bot", botReply);
-                }
-                    setTimeout(() => {
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }, 100);
-            }
-
-            // Small delay before typing starts
-            setTimeout(typeCharacter, 50);
-
-            } catch (error) {
-                console.error("❌ Chatbot request failed:", error);
-
-            if (typingIndicator.parentNode === chatBox) {
-                chatBox.removeChild(typingIndicator);
-            }
-
-            let errorMessage = document.createElement("div");
-            errorMessage.className = "message bot";
-            errorMessage.textContent = "Error connecting to chatbot.";
-            chatBox.appendChild(errorMessage);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        setTimeout(() => {
-            userInputElem.disabled = false;
-            sendBtn.disabled = false;
-        }, 2500);
+  <script>
+    function toggleChat() {
+      const chatbot = document.getElementById("chatbot-wrapper");
+      chatbot.style.display = chatbot.style.display === "none" ? "block" : "none";
     }
-
-        function trackAnalytics(sender) {
-            let analytics = JSON.parse(localStorage.getItem("chatAnalytics")) || {
-                totalMessages: 0,
-                userMessages: 0,
-                botMessages: 0,
-                startTime: null,
-                endTime: null
-        };
-
-        if (!analytics.startTime) {
-            analytics.startTime = new Date().toISOString();
-        }
-
-        analytics.totalMessages++;
-        if (sender === "user") {
-            analytics.userMessages++;
-        } else {
-            analytics.botMessages++;
-        }
-
-        analytics.endTime = new Date().toISOString();
-        localStorage.setItem("chatAnalytics", JSON.stringify(analytics));
-
-        // ✅ Send to backend analytics endpoint
-        fetch("https://chatbot-ai-9vfs.onrender.com/analytics", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                event: sender === "user" ? "user_message" : "bot_response",
-                totalMessages: analytics.totalMessages,
-                userMessages: analytics.userMessages,
-                botMessages: analytics.botMessages,
-                timestamp: new Date().toISOString()
-            })
-        }).catch(err => {
-            console.error("Analytics logging failed:", err);
-        });
-    }
-        function downloadChatHistory() {
-            const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
-            if (history.length === 0) {
-                alert("No chat history to download.");
-                return;
-            }
-
-            let textContent = history.map(msg => {
-                // Create a temporary div to convert HTML to plain text
-                const tempDiv = document.createElement("div");
-                tempDiv.innerHTML = msg.text;
-                const plainText = tempDiv.textContent || tempDiv.innerText || "";
-                return `[${msg.timestamp}] ${msg.sender.toUpperCase()}: ${plainText}`;
-            }).join("\n\n");
-
-            const blob = new Blob([textContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "chat-history.txt";
-            a.click();
-            URL.revokeObjectURL(url);
-
-            clearChatHistory(); // ✅ Clear after download
-    }
-
-        function clearChatHistory() {
-            localStorage.removeItem("chatHistory");
-            document.getElementById("chatBox").innerHTML = "";
-    }
-
-        function endChat() {
-            document.getElementById("userInput").disabled = true;
-            document.getElementById("sendBtn").disabled = true;
-
-            // ✅ Reveal the download button
-            document.getElementById("downloadBtn").style.display = "inline-block";
-
-            // ✅ Hide the end button
-            document.getElementById("endBtn").style.display = "none";
-
-            document.getElementById("userInput").placeholder = "Chat ended.";
-    }
-            document.getElementById("userInput").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
-        
-        function setChatHeight() {
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-        const submenuData = {
-            orders: [
-                "Where is my order?",
-                "Can I change or cancel my order?",
-                "When will [product] be back in stock?"
-            ],
-            shipping: [
-                "Do you ship to my location?",
-                "How much is shipping?",
-                "When will my order arrive?"
-            ],
-            returns: [
-                "What's your return or exchange policy?",
-                "How do I start a return or exchange?",
-                "Where is my return label?"
-            ],
-            product: [
-                "Do you have my size in stock?",
-                "What’s the difference between these two products?",
-                "Are your products sustainable or ethically made?",
-                "How do I care for this product?"
-            ]
-        };
-
-        function renderQuickMenu() {
-            const quickContainer = document.getElementById("chat-quick-buttons");
-
-            quickContainer.innerHTML = `
-                <div style="padding: 10px 0; border-bottom: 1px solid #ccc;">
-                    <p style="margin: 0 0 5px 0;"><strong>👋 Hi there! I’m your virtual support assistant.</strong></p>
-                    <p style="margin: 0 0 10px 0;">I can help with your order, shipping, returns, and more — available 24/7.</p>
-
-                    <p style="margin: 0 0 5px 0;"><strong>Need help with something?</strong></p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                        <button onclick="showSubmenu('orders')">🛒 Orders</button>
-                        <button onclick="showSubmenu('shipping')">🚚 Shipping</button>
-                        <button onclick="showSubmenu('returns')">🔁 Returns</button>
-                        <button onclick="showSubmenu('product')">📦 Products</button>
-                        <button onclick="connectAgent()">💬 Live Agent</button>
-                    </div>
-                    <div id="submenu" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                </div>
-            `;
-        }
-
-        function showSubmenu(category) {
-            const submenu = submenuData[category];
-            const submenuContainer = document.getElementById("submenu");
-
-            submenuContainer.innerHTML = submenu.map(q =>
-                `<button style="white-space: nowrap;" onclick="autoFillInput('${q}')">${q}</button>`
-            ).join('');
-        }
-
-        function autoFillInput(text) {
-            const input = document.getElementById("userInput");
-            input.value = text;
-            input.focus();
-        }
-
-        function connectAgent() {
-            const submenuContainer = document.getElementById("submenu");
-            submenuContainer.innerHTML = '<p>Connecting you with a live agent...</p>';
-        }
-
-        window.addEventListener('resize', setChatHeight);
-        window.addEventListener('load', setChatHeight);
-
-        </script>
-    </body>
+  </script>
+</body>
 </html>
